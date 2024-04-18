@@ -10,11 +10,17 @@ const webusb = new usb.WebUSB({
 });
 
 const showDevices = async () => {
-  const devices = await webusb.getDevices();
+  const devices = await getAllLegacyDevices();
+
   const text = devices.map(
-    (d) => `${d.vendorId}\t${d.productId}\t${d.serialNumber || "<no serial>"}`
+    (d) =>
+      `${d.vendorId}\t${d.productId}\t${d.productName}\t${
+        d.serialNumber || "<no serial>"
+      }`
   );
-  text.unshift("VID\tPID\tSerial\n-------------------------------------");
+  text.unshift(
+    "VID\tPID\tProductName\tSerial\n-------------------------------------"
+  );
 
   windows.forEach((win) => {
     if (win) {
@@ -27,9 +33,9 @@ const getAllLegacyDevices = async () => {
   const devices = usb.getDeviceList();
   const webUSB = [];
   for (const device of devices) {
-    webUSB.push(convertToLegacyToWebUSB(device));
+    webUSB.push(await convertToLegacyToWebUSB(device));
   }
-  debugger;
+  return webUSB;
 };
 
 const convertToLegacyToWebUSB = async (device) => {
@@ -53,8 +59,7 @@ const createWindow = () => {
   // win.webContents.openDevTools()
 
   windows.push(win);
-  //   showDevices();
-  getAllLegacyDevices();
+  showDevices();
 };
 
 // This method will be called when Electron has finished
